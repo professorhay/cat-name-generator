@@ -1,35 +1,113 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>Cat Name Generator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cat Name Generator</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    .card { border: 1px solid #ddd; border-radius: 14px; padding: 18px; }
+    button { font-size: 16px; padding: 10px 14px; border-radius: 10px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+    button:hover { background: #f6f6f6; }
+    #name { font-size: 34px; margin: 14px 0 8px; font-weight: 700; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    label { display: inline-flex; gap: 8px; align-items: center; }
+    input[type="checkbox"] { transform: scale(1.15); }
+    .hint { color: #666; font-size: 14px; }
+  </style>
 </head>
-
 <body>
+  <h1>Cat Name Generator</h1>
+  <div class="card">
+    <div id="name">Click “Generate”</div>
+    <div class="hint" id="subtitle"></div>
 
-<h1>Cat Name Generator</h1>
+    <div class="row" style="margin-top:14px;">
+      <button id="gen">Generate</button>
+      <button id="copy">Copy</button>
+      <button id="again">Generate 5</button>
+    </div>
 
-<button onclick="generateName()">Generate a Cat Name</button>
+    <div class="row" style="margin-top:14px;">
+      <label><input type="checkbox" id="includeTitle" checked> Allow titles (Sir, Lady, etc.)</label>
+      <label><input type="checkbox" id="includeSpace" checked> Allow two-part names</label>
+      <label><input type="checkbox" id="includeFunny" checked> Include silly names</label>
+    </div>
 
-<p id="result"></p>
+    <div id="list" style="margin-top:14px;"></div>
+  </div>
 
 <script>
+  const titles = ["Sir", "Lady", "Captain", "Professor", "Duchess", "King", "Queen", "Saint"];
+  const classy = ["Cleo", "Jasper", "Milo", "Luna", "Nori", "Saffron", "Opal", "Artemis", "Felix", "Ivy", "Theo", "Zelda"];
+  const cute = ["Bean", "Mochi", "Pip", "Biscuit", "Peaches", "Waffles", "Noodle", "Pickle", "Sprout", "Muffin", "Pudding"];
+  const funny = ["Chairman Meow", "Meowzart", "Purrlock", "Catrick Swayze", "Judge Whiskers", "Fuzz Lightyear", "Catniss", "Meowrio"];
 
-const names = [
-"Captain Whiskertron",
-"Lady Moonbean",
-"Sir Pounce",
-"Professor Biscuit",
-"Duchess Pixel",
-"Admiral Floof",
-"Commander Noodle"
-];
+  const traits = ["Whiskers", "Shadow", "Storm", "Sunbeam", "Midnight", "Snow", "Clover", "Maple", "Velvet", "Comet"];
+  const endings = ["son", "kins", "bean", "pants", "muffin", "whisk", "paws", "ito", "ella", "ster"];
 
-function generateName() {
-const random = names[Math.floor(Math.random() * names.length)];
-document.getElementById("result").innerText = random;
-}
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
+  function makeName() {
+    const includeTitle = document.getElementById("includeTitle").checked;
+    const includeSpace = document.getElementById("includeSpace").checked;
+    const includeFunny = document.getElementById("includeFunny").checked;
+
+    // Choose a base style
+    const roll = Math.random();
+    let base;
+
+    if (includeFunny && roll < 0.18) base = pick(funny);
+    else if (roll < 0.55) base = pick([...classy, ...cute]);
+    else {
+      // mash-up: trait + cute ending
+      base = pick(traits) + pick(endings);
+      base = base.replace(/^\w/, c => c.toUpperCase());
+    }
+
+    // Optionally add a second part
+    if (includeSpace && Math.random() < 0.35 && !base.includes(" ")) {
+      const second = Math.random() < 0.5 ? pick(traits) : pick(cute);
+      base = base + " " + second;
+    }
+
+    // Optionally add a title
+    if (includeTitle && Math.random() < 0.22 && !base.startsWith("Sir") && !base.startsWith("Lady")) {
+      base = pick(titles) + " " + base;
+    }
+
+    return base;
+  }
+
+  function showOne() {
+    const name = makeName();
+    document.getElementById("name").textContent = name;
+    document.getElementById("subtitle").textContent = "Guaranteed to improve household morale by 3–17% (unverified).";
+    document.getElementById("list").innerHTML = "";
+  }
+
+  function showFive() {
+    const names = Array.from({length: 5}, makeName);
+    document.getElementById("list").innerHTML =
+      "<ul>" + names.map(n => `<li style="margin:6px 0;">${n}</li>`).join("") + "</ul>";
+  }
+
+  async function copyName() {
+    const text = document.getElementById("name").textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      document.getElementById("subtitle").textContent = "Copied!";
+      setTimeout(() => document.getElementById("subtitle").textContent = "", 900);
+    } catch {
+      document.getElementById("subtitle").textContent = "Copy not available in this browser.";
+    }
+  }
+
+  document.getElementById("gen").addEventListener("click", showOne);
+  document.getElementById("again").addEventListener("click", showFive);
+  document.getElementById("copy").addEventListener("click", copyName);
+
+  showOne();
 </script>
-
 </body>
 </html>
