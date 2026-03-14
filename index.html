@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cat Name Generator</title>
+</head>
+
+<body>
+
+<h1>Cat Name Generator</h1>
+
+<button onclick="generateName()">Generate a Cat Name</button>
+
+<p id="result"></p>
+
+<script>
+
+const names = [
+"Captain Whiskertron",
+"Lady Moonbean",
+"Sir Pounce",
+"Professor Biscuit",
+"Duchess Pixel",
+"Admiral Floof",
+"Commander Noodle"
+];
+
+function generateName() {
+const random = names[Math.floor(Math.random() * names.length)];
+document.getElementById("result").innerText = random;
+}
+
+</script>
+
+</body>
+</html>
